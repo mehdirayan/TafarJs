@@ -89,3 +89,4 @@ const selected = ref([people[1]])
     </template>
   </UTable>
 </template>
+
