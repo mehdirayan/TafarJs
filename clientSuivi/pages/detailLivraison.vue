@@ -47,20 +47,20 @@
 
             tbody: 'block w-full max-h-[200px] overflow-y-scroll',
         }">
-               
-               <template #idEquipement-data="{ row }">
-          <UPopover>
-            <UButton color="white" :label="getEquipementName(row)" variant="link" />
-            <template #panel="{ close }">
-              <div class="p-8">
-                <div v-html="getEquipementDetail(row)"></div>
-                <div class="flex justify-center">
-                  <UButton label="Close" @click="close" />
-                </div>
-              </div>
-            </template>
-          </UPopover>
-        </template>
+
+                <template #idEquipement-data="{ row }">
+                    <UPopover>
+                        <UButton color="white" :label="getEquipementName(row)" variant="link" />
+                        <template #panel="{ close }">
+                            <div class="p-8">
+                                <div v-html="getEquipementDetail(row)"></div>
+                                <div class="flex justify-center">
+                                    <UButton label="Close" @click="close" />
+                                </div>
+                            </div>
+                        </template>
+                    </UPopover>
+                </template>
                 <template #actions-data="{ index, row }">
                     <UButton class="mx-2" icon="i-heroicons-trash" size="2xs" color="red" variant="outline"
                         :ui="{ rounded: 'rounded-full' }" square @click="deleteDt(index)" />
@@ -115,25 +115,40 @@ let livraison: Livraison = reactive({
     lien: "",
 });
 
-let dataTable: DT[] = reactive([]);
+let dts: DT[] = reactive([]);
+
+const dataTable = computed(() => {
+    refresh.value
+    return livraison.dts
+})
 
 const clientName: Ref<string> = ref("");
 
 const refresh = ref(false);
 //--------------------- fetch livraison -----------------------
-const getLivraison = async () => {
+const raffraichir = async () => {
     try {
         livraison = await $fetch<Livraison>(
             `${runtimeConfig.public.SERVER_URL}:${runtimeConfig.public.SERVER_PORT}/livraisons/${idLivraidon}`
         );
 
-        livraison.dts.forEach((elem, index) => {
-            dataTable[index] = Object.assign({}, elem);
-        });
         refresh.value = !refresh.value;
     } catch (error) {
         console.log(error);
     }
+//--------------------------- raffraichir list dt
+    try {
+    dts = await $fetch<DT[]>(
+        `${runtimeConfig.public.SERVER_URL}:${runtimeConfig.public.SERVER_PORT}/dts`
+    );
+
+    //------------------------ ajout idclient--------------------------
+    dts.map((dt) => {
+        dt.idClient = getClientIdByEquipementId(dt.idEquipement);
+    });
+} catch (error) {
+    console.log(error);
+}
 };
 
 const getClientName = async () => {
@@ -148,7 +163,7 @@ const getClientName = async () => {
     }
 };
 
-await getLivraison();
+await raffraichir();
 await getClientName();
 
 //-------------------------------------- table dt ------------------------------------
@@ -158,7 +173,7 @@ const columns = [
         label: "Date",
         sortable: true,
     },
-   
+
     {
         key: "idEquipement",
         label: "Equipement",
@@ -192,10 +207,47 @@ const columns = [
         sortable: false,
     },
 ];
+//------------------------- suppression ligne dt -------------------------------------
+const deleteDt = (index: number) => {
 
-const deleteDt = (index: number) => { };
+    toast.add({
+        title: 'Suppression ligne dt ', description: "Etes-vous sur de vouloir supprimer cette ligne ?",
+        actions: [{
+            label: 'Delete',
+            click: async () => {
 
-let dts: DT[] = reactive([]);
+                try {
+                    livraison.dts.splice(index, 1)
+                    await $fetch<Client[]>(
+                        `${runtimeConfig.public.SERVER_URL}:${runtimeConfig.public.SERVER_PORT}/livraisons/${livraison._id}`,
+                        {
+                            method: "PUT",
+                            body: livraison
+                        }
+                    );
+
+                } catch (error) {
+
+                    toast.add({
+                        title: 'Erreur ',
+                        description: (error as Error).message,
+                        timeout: 10000,
+                        color: 'red'
+                    })
+                }
+
+                toast.add({
+                    title: 'Suppression client ',
+                    description: 'La ligne dt a bien été supprimer',
+
+                })
+                raffraichir()
+            }
+        }]
+    })
+};
+
+
 
 const selected: Ref<DT[]> = ref([]);
 
@@ -249,11 +301,11 @@ try {
 }
 
 const getEquipementDetail = (row: DT) => {
-  const result = equipements.filter((equipement) => {
-    return equipement._id === row.idEquipement;
-  });
+    const result = equipements.filter((equipement) => {
+        return equipement._id === row.idEquipement;
+    });
 
-  const html: string = `
+    const html: string = `
     <div class="mb-4">
       <div class="flex">
         <h4 class="pr-2">Désignation :</h4>
@@ -273,7 +325,7 @@ const getEquipementDetail = (row: DT) => {
       </div>
     </div>`;
 
-  return html;
+    return html;
 };
 
 //------------------------------------------ modal add dt------------------------------
@@ -338,6 +390,8 @@ const getEquipementName = (row: DT) => {
 
 const addDts = async () => {
 
+    isOpenAddDT.value=false
+
     selected.value.forEach(dt => {
         livraison.dts.push(dt)
     })
@@ -368,14 +422,14 @@ const addDts = async () => {
         })
     }
 
-    //raffraichir();
+    raffraichir();
 
 
 
 }
 
 //-------------------------------- génération bon de livraison ------------------
-const genererBonLivraison=()=>{
-    
+const genererBonLivraison = () => {
+
 }
 </script>

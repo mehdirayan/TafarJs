@@ -341,6 +341,7 @@ const raffraichir = async (index?: number) => {
     dt = await $fetch<DT>(
       `${runtimeConfig.public.SERVER_URL}:${runtimeConfig.public.SERVER_PORT}/dts/${idDt}`
     );
+    console.log(dt)
     refresh.value = !refresh.value;
     if (index) {
       select(dataTable.value[index])
@@ -352,7 +353,7 @@ const raffraichir = async (index?: number) => {
 
 await raffraichir();
 
-const dataTable = computed(() => {
+const dataTable = computed(() => { 
   refresh.value;
   return dt.opérations;
 });

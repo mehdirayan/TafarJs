@@ -6,6 +6,9 @@ export type DtDocument = HydratedDocument<Dt>;
 
 @Schema()
 export class Dt {
+  @Prop()
+  _id: Types.ObjectId
+
   @Prop({ required: true })
   date: Date;
 

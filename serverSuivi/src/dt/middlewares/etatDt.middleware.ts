@@ -8,13 +8,13 @@ export class EtatDtMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     let dt:CreateDtDto = req.body
     
-    //--------------- si non commencé operation>0  ----------> en cours /
+    //--------------- si non commencé operation > 0  ----------> en cours /
     if (dt.état==eEtat.nonCommence && dt.opérations.length>0){
       req.body.état=eEtat.enCours
       req.body.test=eTest.pasFini
     }
 
-    //--------------- si en cours operation =0  ----------> non comencé /
+    //--------------- si en cours operation = 0  ----------> non comencé /
 
     if((dt.état==eEtat.enCours || dt.état==eEtat.achevée) && dt.opérations.length==0){
       req.body.état=eEtat.nonCommence

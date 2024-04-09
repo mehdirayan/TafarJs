@@ -3,10 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Dt } from './schema/dt.schema';
 import { CreateDtDto } from './dto/dt.dto';
+import { eEtat } from './interfaces/type';
 
 @Injectable()
 export class DtService {
-  constructor(@InjectModel(Dt.name) private DtModel: Model<Dt>) {}
+  constructor(@InjectModel(Dt.name) private DtModel: Model<Dt>) { }
 
   async findAll(): Promise<Dt[]> {
     const dt = await this.DtModel.find();
@@ -18,8 +19,9 @@ export class DtService {
     return createdDt.save();
   }
 
-  async findOne(id: Types.ObjectId): Promise<Dt> {
-    const dt = await this.DtModel.findById(id);
+  async findOne(id: Types.ObjectId): Promise<Dt> { console.log(id)
+    const dt = await this.DtModel.findById(new Types.ObjectId(id));
+    console.log(dt)
     return dt;
   }
 
@@ -35,5 +37,11 @@ export class DtService {
     return updatedDt;
   }
 
- 
+  async updateEtatDt(id: Types.ObjectId, état: eEtat) {
+
+    await this.DtModel.findByIdAndUpdate(new Types.ObjectId(id), { $set: { état: état } }, { new: true });
+
+
+  }
+
 }

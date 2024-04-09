@@ -10,6 +10,7 @@ import { ÉquipementModule } from './équipement/équipement.module';
 import { DtModule } from './dt/dt.module';
 import { LivraisonModule } from './livraison/livraison.module';
 import { EtatDtMiddleware } from './dt/middlewares/etatDt.middleware';
+import { LivraisonEtatDtMiddleware } from './livraison/middlewares/livraisonEtatDt.middleware';
 
 @Module({
   imports: [
@@ -30,5 +31,6 @@ export class AppModule implements NestModule {
     consumer
       .apply(EtatDtMiddleware)
       .forRoutes({ path: 'dts/*', method: RequestMethod.PUT });
+    consumer.apply(LivraisonEtatDtMiddleware).forRoutes({ path: 'livraisons/*', method: RequestMethod.PUT })
   }
 }
