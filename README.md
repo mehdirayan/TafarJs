@@ -5,7 +5,7 @@
 This App helps the repair shop owners to manage their work.
 It helps:
 * Storing the customers with their equipment in the database.
-* Storing the repair reports and the state of repai work.
+* Storing the repair reports and the state of repair work.
 * Generate shipping documents and bills.
 * Make statistics of the work.
 
